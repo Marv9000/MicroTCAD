@@ -13,7 +13,7 @@ ComponentCreation - Create
 UnitSystem - US
 Main
 
-The instructions on how to use the MA, Create and US modules are down below with the other modules containing the underlying functions that allow this. Further explanation of these modules can be seen in my write up
+The instructions on how to use the MA, Create and US modules are down below with the other modules containing the underlying functions that allow this. Further explanation of these modules can be seen in my MicroTCAD Documentation
 
 ################# Unit System ##################
 
