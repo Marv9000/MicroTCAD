@@ -19,6 +19,15 @@ The instructions on how to use the MA, Create and US modules are down below with
 
 When declaring variables UnitSystem classes should be used to ensure any units entered are properly converted to SI units. For example
 
+```python
+from UnitSystem import Length, Concentration
+
+# Converts 100 cm -> 1.0 m
+l = Length(100, "cm")
+
+# Converts 1e16 cm^-3 -> 1e22 m^-3
+Na = Concentration(1e16, "cm-3")
+```
 l = Length(100,"cm") returns l as 1m
 and 
 Na = Concentration(1e16,"cm-3") returns Na as 1e22 m-3
