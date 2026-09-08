@@ -17,10 +17,10 @@ The instructions on how to use the MA, Create and US modules are down below with
 
 ################# Unit System ##################
 
-When declaring variables UnitSystem classes should be used to ensure any units entered are properly converted to SI units. For example
+When declaring variables UnitSystem classes should be used to ensure any units entered are properly converted to SI units to allow for ease of use in my formulas. For example
 
 ```python
-from UnitSystem import Length, Concentration
+from UnitSystem import *
 
 # Converts 100 cm -> 1.0 m
 l = Length(100, "cm")
@@ -28,10 +28,6 @@ l = Length(100, "cm")
 # Converts 1e16 cm^-3 -> 1e22 m^-3
 Na = Concentration(1e16, "cm-3")
 ```
-l = Length(100,"cm") returns l as 1m
-and 
-Na = Concentration(1e16,"cm-3") returns Na as 1e22 m-3
-
 the current UnitSystem classes are:
 Length
 Concentration
@@ -50,14 +46,20 @@ Temperature
 Area
 
 Functions that can be called on this diode object are:
+```python
+import ComponentCreation as Create
 
+diode1 = Create.Diode("MaterialName", "DeviceLength", "Na", "Nd", "Temp", "Area")
 diode1.VoltageSweepAtEquilibrium()
 diode1.ElectricFieldSweepAtEquilibrium()
-and
-diode1.IV_Sweep() which can take in inputs of the voltage range wanted to sweep
+diode1.IV_Sweep() # Which can take arguments Vmin and Vmax or have them set to be from 0 to 1
+```
 
 ######################## MaterialAnalysis ##################
 Material analysis currently contains 1 function that graphs the intrinsic carrier concentration vs temperature of the specified material.
 It is called by typing
+```python
+import MaterialAnalysis as MA
 MA.intrinsic_Carrier_Conc_Vs_Temp("MaterialName")
+```
 in main
