@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 def intrinsic_Carrier_Conc_Vs_Temp(MaterialName):
 
+
     #Temp boundaries set to stay within the extrinsic region
     temp_min = 200
     temp_max = 600
@@ -31,3 +32,6 @@ def intrinsic_Carrier_Conc_Vs_Temp(MaterialName):
 
     plt.savefig("ni_vs_temperature.png")
     plt.show()
+
+
+

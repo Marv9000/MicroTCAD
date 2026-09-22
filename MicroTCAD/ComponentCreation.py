@@ -2,22 +2,48 @@ from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
 import DevicePhysics as DP
+from typing import ClassVar
+import random
 
 
 # Diode class
 @dataclass
 class Diode():
-    Material : str
-    device_length: float
-    Na: float
-    Nd: float
-    Temp: float
-    Area: float
 
-    def VoltageSweepAtEquilibrium(self):
+    instances: ClassVar[list] = []
+
+    Name: str = None
+    Material : str = None
+    device_length: float = None
+    Na: float = None
+    Nd: float = None
+    Area: float = None
+
+    def __post_init__(self):
+
+        if self.Name == "random":
+            self.Name = "diode" + str(len(self.instances) + 1)
+            self.instances.append(self.Name)
+
+            #Range of suitable values for said variables
+            self.Material = "Silicon"
+            self.device_length = random.uniform(2e-5, 1e-6)
+
+            # Doping even further range limited to decrease time iterations take
+            self.Na = random.uniform(1e20, 1e22)
+            self.Nd = random.uniform(1e20,1e22)
+
+
+            self.Area = random.uniform(1e-6,1e-10)
+
+            print(self)
+
+
+
+    def VoltageSweepAtEquilibrium(self, temperature):
 
         # Voltage array mapping to points in the x grid
-        x, V = DP._1D_Poisson_For_Diodes_Equilibrium(self.Material, self.Nd, self.Na, self.Temp, self.device_length)
+        x, V = DP._1D_Poisson_For_Diodes_Equilibrium(self.Name, self.Material, self.Nd, self.Na, temperature, self.device_length)
 
         #Graph creation
         plt.figure()
@@ -34,10 +60,12 @@ class Diode():
         plt.grid(True)
         plt.show()
 
-    def ElectricFieldSweepAtEquilibrium(self):
+        
+
+    def ElectricFieldSweepAtEquilibrium(self, temperature):
 
         # Voltage array mapping to points in the x grid
-        x, V = DP._1D_Poisson_For_Diodes_Equilibrium(self.Material, self.Nd, self.Na, self.Temp, self.device_length)
+        x, V = DP._1D_Poisson_For_Diodes_Equilibrium(self.Material, self.Nd, self.Na, temperature, self.device_length)
 
         # Differentiate voltage with respect to x for electric field
         E = -np.gradient(V,x)
@@ -56,7 +84,7 @@ class Diode():
         plt.savefig("electric_field.png")
         plt.show()
 
-    def IV_Sweep(self, V_min=0, V_max=1):
+    def IV_Sweep(self, temperature ,V_min=0, V_max=1):
         # Set step length
         step_Length = 0.01
 
@@ -66,7 +94,7 @@ class Diode():
 
         # Create current array for every point voltage in V array
         I = np.array([
-            DP._shockley_diode_current(self.Material, self.Nd, self.Na, self.Temp, self.Area, v)
+            DP._shockley_diode_current(self.Material, self.Nd, self.Na, temperature, self.Area, v)
             for v in V
         ])
 
@@ -87,7 +115,5 @@ class Diode():
         plt.savefig("iv_curve_linear.png")
         plt.show()
         
-
-
 
 

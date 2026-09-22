@@ -1,7 +1,7 @@
 import Materials
 import numpy as np
 from UnitSystem import *
-
+import time
 
 
 MATERIAL_LIST = Materials.MATERIAL_LIST
@@ -10,9 +10,24 @@ MATERIAL_LIST = Materials.MATERIAL_LIST
 ELECTRON_CHARGE: float = 1.602e-19
 BOLTZMANN_CONSTANT : float = 1.380649e-23
 
+# helper timer function
+def _TimerFunc(timer_info, current_iteration):
+    time_elapsed = time.perf_counter() - timer_info["start_time"]
+    currentSecond = int(time_elapsed)
+
+    if currentSecond > timer_info["last_printed_second"]:
+
+        if current_iteration > 0:
+            averageTime = time_elapsed/current_iteration
+            print(f"Average Time Per Iteration: {averageTime:.3f}s", end="\r")
+
+    timer_info["last_printed_second"] = currentSecond
+
+
+
 # Solves a 1D Poisson equation for pn junction in equlibrium utilising Newton-Raphson iteration and nondimensionalisation
 # Returns x being the grid seperation and V being the voltage at each grid point throughout the pn junction
-def _1D_Poisson_For_Diodes_Equilibrium(MaterialName, Nd, Na, T, device_length):
+def _1D_Poisson_For_Diodes_Equilibrium(diodeName, MaterialName, Nd, Na, T, device_length):
 
     # Thermal Voltage
     Vth = (BOLTZMANN_CONSTANT * T) / ELECTRON_CHARGE
@@ -70,12 +85,20 @@ def _1D_Poisson_For_Diodes_Equilibrium(MaterialName, Nd, Na, T, device_length):
     iterations = 0
     max_iteration_count = 500
 
+
+    ## Start Timer
+    timer_info = {
+        "start_time": time.perf_counter(),
+        "last_printed_second": 0}
+
+
     while max_error > tolerance and iterations < max_iteration_count:
 
         # Reset Residuals and Jacobian every iteration
         R = np.zeros(N)
         J = np.zeros((N, N))
 
+        _TimerFunc(timer_info, iterations)
 
         for i in range(1, N-1):
 
@@ -110,8 +133,13 @@ def _1D_Poisson_For_Diodes_Equilibrium(MaterialName, Nd, Na, T, device_length):
         V_scaled = V_scaled + 0.5 * delta_V
 
         iterations += 1
-        print(iterations)
-    
+
+    timeElapsed = time.perf_counter() - timer_info["start_time"]
+    print(f"{diodeName} iteration count: {iterations}")
+    print(f"Total Time elapsed: {timeElapsed:.2f}s")
+
+    ## new line
+    print("")
 
     if iterations == max_iteration_count:
         print("Warning: iterations reached max before converging to tolerance.")
