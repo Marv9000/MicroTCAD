@@ -16,3 +16,4 @@ diode1.IV_Sweep(temperature=300)
 
 DA.CMP_VoltageSweepAtEquilibrium(diode1= diode1, diode2=diode2, temperature=300)
 
+MA.intrinsic_Carrier_Conc_Vs_Temp("Silicon")
