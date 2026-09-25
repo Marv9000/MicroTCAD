@@ -42,7 +42,8 @@ def _1D_Poisson_For_Diodes_Equilibrium(diodeName, MaterialName, Nd, Na, T, devic
     N_ideal = int(np.ceil((4 * device_length)/ Ld)) + 1
     
     # Cap N so computation isnt too long
-    N = max(2000, min(N_ideal, 8000))
+    N = max(2000, min(N_ideal, 10000))
+    print(N)
 
     # Define grid spacing
     x = np.linspace(-device_length/2, device_length/2, N)
@@ -123,8 +124,44 @@ def _1D_Poisson_For_Diodes_Equilibrium(diodeName, MaterialName, Nd, Na, T, devic
         # Determine Max residual
         max_error = np.max(np.abs(R))
 
-        # Compute change in V_scaled needed to converge via Newtons formula
-        delta_V = np.linalg.solve(J, -R)
+        # Tridiagonal Matrix algorithm Algorithmn
+
+        # Leading Diagonal
+        b = np.diag(J,k=0)
+
+        # Sub diagonal
+        non_padded_a = np.diag(J,k=-1)
+        a = np.insert(non_padded_a,0,0)
+
+        # Upper diagonal
+        non_padded_c = np.diag(J,k=1)
+        c = np.append(non_padded_c,0)
+
+        # length of vectors
+        n = len(c)
+
+        # Initialise solution matrices
+        c_prime = np.zeros(n)
+        R_prime = np.zeros(n)
+        delta_V = np.zeros(n)
+
+        # Initialise Boundaries
+        c_prime[0] = c[0]/ b[0]
+        R_prime[0] = R[0]/ b[0]
+        
+        # Populate c_prime and Residual Matrix
+        for i in range(1,n):
+            demoniator = b[i]  - a[i]*(c_prime[i-1])
+            c_prime[i] =  c[i] / demoniator
+            R_prime[i] = ( R[i] - a[i]*(R_prime[i-1]) ) / demoniator
+        
+        # Set delta_V boundary
+        delta_V[n-1] = -R_prime[n-1]
+
+        # Solve for delta_V using Tridiagonal matrix Algo
+        for i in range(n-2,-1, -1):
+        
+            delta_V[i] = -R_prime[i] - (c_prime[i] * delta_V[i+1])
 
         # Prevents V_Scaled from becoming too large and creating a large exponential
         delta_V = np.clip(delta_V, -1, 1) 
@@ -135,11 +172,10 @@ def _1D_Poisson_For_Diodes_Equilibrium(diodeName, MaterialName, Nd, Na, T, devic
         iterations += 1
 
     timeElapsed = time.perf_counter() - timer_info["start_time"]
-    print(f"{diodeName} iteration count: {iterations}")
-    print(f"Total Time elapsed: {timeElapsed:.2f}s")
 
-    ## new line
-    print("")
+    print(f"\n{diodeName} iteration count: {iterations}")
+    print(f"Total Time elapsed: {timeElapsed:.2f}s\n")
+
 
     if iterations == max_iteration_count:
         print("Warning: iterations reached max before converging to tolerance.")

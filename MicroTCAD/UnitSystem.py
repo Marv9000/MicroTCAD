@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-__all__ = ["Length", "Concentration", "Temperature", "Mobility", "Time"]
+__all__ = ["Length", "Concentration", "Temperature", "Mobility", "Time", "Area"]
 
 
 ## CONVERTS ALL UNITS INTO SI UNITS FOR SIMPLICITY AND EASE OF USE 
@@ -75,10 +75,25 @@ class Time(float):
         "Name": "Time",
         "s": lambda v: v,
         "ms": lambda v : v * 10e-3,
-        "us": lambda v: v * 10-6,
-        "ns": lambda v: v * 10-9
+        "us": lambda v: v * 10e-6,
+        "ns": lambda v: v * 10e-9
     }
 
     def __new__(cls, Value: float, Unit: str):
         SI_Value = _unit_check_helper(Value, Unit, cls.TIME_UNITS)
         return super().__new__(cls, SI_Value)
+
+class Area(float):
+
+    AREA_UNITS = {
+        "Name": "Area",
+        "m2": lambda v: v,
+        "cm2": lambda v: v * 10e-4,
+        "mm2": lambda v: v * 10e-6,
+        "um2": lambda v: v * 10e-12,
+        "nm2": lambda v: v * 10e-18
+    
+    }
+    def __new__(cls, Value: float, Unit: str):
+            SI_Value = _unit_check_helper(Value, Unit, cls.AREA_UNITS)
+            return super().__new__(cls, SI_Value)

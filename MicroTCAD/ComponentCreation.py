@@ -21,7 +21,7 @@ class Diode():
 
     def __post_init__(self):
 
-        if self.Name == "random":
+        if self.Name == "random" or self.Name == "rand":
             self.Name = "diode" + str(len(self.instances) + 1)
             self.instances.append(self.Name)
 
@@ -29,18 +29,25 @@ class Diode():
             self.Material = "Silicon"
             self.device_length = random.uniform(2e-5, 1e-6)
 
-            # Doping even further range limited to decrease time iterations take
-            self.Na = random.uniform(1e20, 1e22)
-            self.Nd = random.uniform(1e20,1e22)
+            # Clamped further to ensure doping doesnt cause extremely small depletion regions
+            self.Na = random.uniform(1e20, 1e23)
+            self.Nd = random.uniform(1e20,1e23)
 
 
             self.Area = random.uniform(1e-6,1e-10)
 
             print(self)
+        else:
+            for key, value in vars(self).items():
+                if value == None:
+                    raise ValueError(f"Nothing has been inputted for {key}. Either enter all device specifications or rand/random for random specifications ")
+
+
 
 
 
     def VoltageSweepAtEquilibrium(self, temperature):
+
 
         # Voltage array mapping to points in the x grid
         x, V = DP._1D_Poisson_For_Diodes_Equilibrium(self.Name, self.Material, self.Nd, self.Na, temperature, self.device_length)
@@ -65,7 +72,7 @@ class Diode():
     def ElectricFieldSweepAtEquilibrium(self, temperature):
 
         # Voltage array mapping to points in the x grid
-        x, V = DP._1D_Poisson_For_Diodes_Equilibrium(self.Material, self.Nd, self.Na, temperature, self.device_length)
+        x, V = DP._1D_Poisson_For_Diodes_Equilibrium(self.Name, self.Material, self.Nd, self.Na, temperature, self.device_length)
 
         # Differentiate voltage with respect to x for electric field
         E = -np.gradient(V,x)
@@ -103,7 +110,7 @@ class Diode():
 
         plt.plot(V, I)
 
-        plt.ylim(0,50) 
+        plt.ylim(0,15) 
 
         # Labels and Title
         plt.xlabel("Applied Voltage (V)")
