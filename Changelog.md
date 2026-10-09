@@ -9,3 +9,7 @@
 ## 2026-09-25 - v[1.2]
 ### New Features:
 * Implemented the Tridiagonal Matrix Algorithm to drastically decrease time spent on an iteration by 98.53%
+
+## 2026-10-09 - v[1.3]
+### New Features:
+* Implemented a new material - Silicon Carbide 4H-SiC
