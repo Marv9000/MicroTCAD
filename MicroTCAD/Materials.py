@@ -241,5 +241,3 @@ MATERIAL_LIST : dict[str, Material] = {
 }
 
 
-SiC = MATERIAL_LIST["Silicon Carbide"]
-
