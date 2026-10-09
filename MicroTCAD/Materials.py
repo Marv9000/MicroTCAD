@@ -59,6 +59,10 @@ class Material:
     Eg_0K : float 
     permittivity : float 
 
+    # taken from the Ioffe Semiconductor Institute Website
+    Nc_const: float
+    Nv_const: float
+
     VarshniInfo: VarshniParametersClass
     MobilityInfo: MobilityInfoClass
     MinorityLifetimeInfo: MinorityLifetimeInfoClass
@@ -71,10 +75,12 @@ class Material:
 
     # Calculates Density of States at each band edge in m^-3
     # Formulas taken from the Ioffe Institute's Website
-    def _calculate_DOS_at_band_edge(T : float) -> tuple[float,float]:
+    def _calculate_DOS_at_band_edge(T : float, MatName: str) -> tuple[float,float]:
+
+        MatInfo = MATERIAL_LIST[MatName]
   
-        Nc = Concentration(6.2e15*(T**(3/2)), "cm-3")
-        Nv = Concentration(3.5e15*(T**(3/2)), "cm-3")
+        Nc = Concentration(MatInfo.Nc_const*(T**(3/2)), "cm-3")
+        Nv = Concentration(MatInfo.Nv_const*(T**(3/2)), "cm-3")
 
         return Nc, Nv
 
@@ -82,15 +88,17 @@ class Material:
     def _calculate_intrinsic_carrier_conc(T:float, MaterialName: str) -> float:
 
         # Density of states at band edges
-        Nc, Nv = Material._calculate_DOS_at_band_edge(T)
+        Nc, Nv = Material._calculate_DOS_at_band_edge(T, MaterialName)
 
         # Band Gap calc
         Eg = Material._calculate_Band_Gap(T, MaterialName)
 
-        exponentialTerm = np.exp(-Eg/((BOLTZMANN_CONSTANT/ELECTRON_CHARGE) * T))
+        # Thermal Voltage
+        Vt = (BOLTZMANN_CONSTANT/ELECTRON_CHARGE) * T
+        exponentialTerm = np.exp(-Eg / (2 * Vt))
 
         # intrinsic carrier conc
-        intrinsic_carrier_conc : float  = np.sqrt(Nc * Nv * exponentialTerm)
+        intrinsic_carrier_conc : float  = np.sqrt(Nc * Nv ) * exponentialTerm
         return intrinsic_carrier_conc
 
 
@@ -146,6 +154,8 @@ MATERIAL_LIST : dict[str, Material] = {
         symbol = "Si",
         Eg_0K = 1.17,
         permittivity = 1.04e-10,
+        Nc_const = 6.2e15,
+        Nv_const = 3.5e15,
         VarshniInfo = VarshniParametersClass(
             alpha = 4.73e-4,
             beta = 636,
@@ -183,7 +193,53 @@ MATERIAL_LIST : dict[str, Material] = {
 
         )
 
+    ),
+    "Silicon Carbide": Material(
+        name = "Silicon Carbide",
+        symbol = "4H-SiC",
+        Eg_0K = 3.265,
+        permittivity = 8.553e-11,
+        Nc_const = 3.25e15,
+        Nv_const = 4.8e15,
+        VarshniInfo = VarshniParametersClass(
+            alpha = 6.5e-4,
+            beta = 1200,
+        ),
+        MobilityInfo = MobilityInfoClass(
+            electron_max_300k = Mobility(947,"cm2/Vs"),
+            hole_max_300k = Mobility(124,"cm2/Vs"),
+            e_max_scaling_exponent = -2.40,
+            h_max_scaling_exponent = -2.15,
+                    
+            electron_min_300k = Mobility(40,"cm2/Vs"),
+            hole_min_300k = Mobility(15.9, "cm2/Vs"),
+            e_min_scaling_exponent = -0.50,
+            h_min_scaling_exponent = -0.50,
+                    
+            e_reference_doping_conc_300k = Concentration(1.94e17,"cm-3"),
+            h_reference_doping_conc_300k = Concentration(1.76e19,"cm-3"),
+                    
+            e_reference_scaling_exponent = 0,
+            h_reference_scaling_exponent = 0,
+                    
+            e_slope_factor = 0.610,
+            h_slope_factor = 0.340
+        ),
+        MinorityLifetimeInfo = MinorityLifetimeInfoClass(
+
+            e_max_lifetime = Time(0.5e-6,"s"),
+            h_max_lifetime = Time(0.1e-6,"s"),
+
+            e_Nref = Concentration(5e16,"cm-3"),
+            h_Nref = Concentration(5e16,"cm-3"),
+
+            e_fitting_expo = 1,
+            h_fitting_expo = 1
+
+        )
     )
 }
 
+
+SiC = MATERIAL_LIST["Silicon Carbide"]
 

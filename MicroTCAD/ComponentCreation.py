@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
 import DevicePhysics as DP
+import Materials
 from typing import ClassVar
 import random
 
@@ -21,7 +22,7 @@ class Diode():
 
     def __post_init__(self):
 
-        if self.Name == "random" or self.Name == "rand":
+        if self.Name == "random" or self.Name == "rand": 
             self.Name = "diode" + str(len(self.instances) + 1)
             self.instances.append(self.Name)
 
@@ -61,7 +62,7 @@ class Diode():
         # Labels and Title
         plt.xlabel("Position, x (um)")
         plt.ylabel("Voltage, V (V)")
-        plt.title("Voltage Across PN Junction")
+        plt.title(f"{self.Name} Voltage Across PN Junction")
 
         plt.savefig("voltage.png")
         plt.grid(True)
@@ -84,26 +85,35 @@ class Diode():
         # Labels and Title
         plt.xlabel("Position (um)")
         plt.ylabel("Electric Field (V/m)")
-        plt.title("Equilibrium Electric Field")
+        plt.title(f"{self.Name} Equilibrium Electric Field")
 
 
         plt.grid(True)
         plt.savefig("electric_field.png")
         plt.show()
 
-    def IV_Sweep(self, temperature ,V_min=0, V_max=1):
+    def IV_Sweep(self, temperature ,V_min=0, V_max=3):
         # Set step length
         step_Length = 0.01
+
+        scalingFactor = 1.1
+
+        Eg = Materials.Material._calculate_Band_Gap(temperature, self.Material)
+
+        V_max = scalingFactor * Eg
+
+        print(V_max)
 
         # Set V array from V_min to V_max in intervals of step_length
         V = np.arange(V_min, V_max + step_Length, step_Length)
 
-
         # Create current array for every point voltage in V array
         I = np.array([
             DP._shockley_diode_current(self.Material, self.Nd, self.Na, temperature, self.Area, v)
-            for v in V
+            for v in V 
         ])
+        print(I)
+
 
         # Graph Creation
         plt.figure()
@@ -115,7 +125,7 @@ class Diode():
         # Labels and Title
         plt.xlabel("Applied Voltage (V)")
         plt.ylabel("Current (A)") 
-        plt.title("Diode I-V Characteristic")
+        plt.title(f"{self.Name} I-V Characteristic")
 
         plt.grid(True)
 
